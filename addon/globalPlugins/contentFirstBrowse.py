@@ -292,28 +292,6 @@ def _patched_getTextInfoSpeech(
 		firstField = textWithFields[0]
 		if isinstance(firstField, str):
 			firstText = firstField.strip() if not firstField.isspace() else firstField
-	if onlyInitialFields or (
-		isWordOrCharUnit
-		and (len(firstText) == 1 or len(unicodeNormalize(firstText)) == 1)
-		and all(speechMod._isControlEndFieldCommand(x) for x in itertools.islice(textWithFields, 1, None))
-	):
-		if reason != OutputReason.ONLYCACHE:
-			yield from _getTextInfoSpeech_considerSpelling(
-				unit,
-				onlyInitialFields,
-				textWithFields,
-				reason,
-				speechSequence,
-				language,
-			)
-		if useCache:
-			_getTextInfoSpeech_updateCache(
-				useCache,
-				speakTextInfoState,
-				newControlFieldStack,
-				formatFieldAttributesCache,
-			)
-		return False
 
 	# Similar to before, but If the most inner clickable is exited, then we allow announcing clickable for the next lot of clickable fields entered.
 	inClickable = False
@@ -355,6 +333,44 @@ def _patched_getTextInfoSpeech(
 			if hasMath:
 				_extendSpeechSequence_addMathForTextInfo(relativeSpeechSequence, info, pending["field"])
 			pending["flushed"] = True
+
+	if onlyInitialFields or (
+		isWordOrCharUnit
+		and (len(firstText) == 1 or len(unicodeNormalize(firstText)) == 1)
+		and all(speechMod._isControlEndFieldCommand(x) for x in itertools.islice(textWithFields, 1, None))
+	):
+		if reason != OutputReason.ONLYCACHE:
+			if onlyInitialFields:
+				_flushPending()
+				speechSequence.extend(relativeSpeechSequence)
+			spellingGen = _getTextInfoSpeech_considerSpelling(
+				unit,
+				onlyInitialFields,
+				textWithFields,
+				reason,
+				speechSequence,
+				language,
+			)
+			if onlyInitialFields:
+				yield from spellingGen
+			else:
+				for sequence in spellingGen:
+					yield sequence
+					if sequence is speechSequence:
+						continue
+					_flushPending()
+					if relativeSpeechSequence:
+						yield relativeSpeechSequence
+					yield from spellingGen
+					break
+		if useCache:
+			_getTextInfoSpeech_updateCache(
+				useCache,
+				speakTextInfoState,
+				newControlFieldStack,
+				formatFieldAttributesCache,
+			)
+		return False
 
 	for command in textWithFields:
 		if isinstance(command, str):
