@@ -1,4 +1,4 @@
-﻿# contentFirstBrowse (Browse Mode Content First)
+# contentFirstBrowse (Browse Mode Content First)
 
 `contentFirstBrowse` is an NVDA global plugin that optimizes speech order in browse mode.
 

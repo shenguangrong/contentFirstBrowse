@@ -1,0 +1,42 @@
+@charset "utf-8";
+
+body {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	line-height: 1.2em;
+}
+
+h1,
+h2 {
+	text-align: center;
+}
+
+dt {
+	clear: left;
+	float: left;
+	font-weight: bold;
+	width: 10%;
+}
+
+dd {
+	display: block;
+	float: left;
+	margin: 0 0 0.4em;
+	width: 90%;
+}
+
+p {
+	clear: both;
+}
+
+a {
+	text-decoration: underline;
+}
+
+:active {
+	text-decoration: none;
+}
+
+a:focus,
+a:hover {
+	outline: solid;
+}
