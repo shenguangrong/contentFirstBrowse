@@ -3,14 +3,27 @@
 
 import builtins
 import itertools
+
+import addonHandler
+import config
 import globalPluginHandler
 import browseMode
+import globalVars
+import gui
 import scriptHandler
 import speech
 import speech.speech as speechMod
+import wx
 from controlTypes import OutputReason
+from gui import guiHelper
 from logHandler import log
 
+addonHandler.initTranslation()
+
+_CONFIG_SECTION = "contentFirstBrowse"
+_CONFIG_SPEC = {
+    "enabled": "boolean(default=True)",
+}
 _original_getTextInfoSpeech = speechMod.getTextInfoSpeech
 _isPatched = False
 
@@ -544,21 +557,67 @@ def _patched_getTextInfoSpeech(
     return True
 
 
+def _setPatchEnabled(enabled):
+    global _isPatched
+    if enabled and not _isPatched:
+        speechMod.getTextInfoSpeech = _patched_getTextInfoSpeech
+        speech.getTextInfoSpeech = _patched_getTextInfoSpeech
+        _isPatched = True
+        log.info("contentFirstBrowse: patched getTextInfoSpeech for browse mode caret")
+    elif not enabled and _isPatched:
+        if speechMod.getTextInfoSpeech is _patched_getTextInfoSpeech:
+            speechMod.getTextInfoSpeech = _original_getTextInfoSpeech
+        if speech.getTextInfoSpeech is _patched_getTextInfoSpeech:
+            speech.getTextInfoSpeech = _original_getTextInfoSpeech
+        _isPatched = False
+        log.info("contentFirstBrowse: restored original getTextInfoSpeech")
+
+
+class ContentFirstBrowseSettingsPanel(gui.settingsDialogs.SettingsPanel):
+    # Translators: Title of the add-on's category in the NVDA settings dialog.
+    title = _("Browse mode content first")
+
+    def makeSettings(self, settingsSizer):
+        settingsHelper = guiHelper.BoxSizerHelper(self, sizer=settingsSizer)
+        # Translators: Checkbox that enables content-first speech in browse mode.
+        self.enabledCheckBox = settingsHelper.addItem(
+            wx.CheckBox(self, label=_("&Enable content-first speech in browse mode")),
+        )
+        self.enabledCheckBox.SetValue(bool(config.conf[_CONFIG_SECTION]["enabled"]))
+
+    def onSave(self):
+        enabled = self.enabledCheckBox.IsChecked()
+        config.conf[_CONFIG_SECTION]["enabled"] = enabled
+        _setPatchEnabled(enabled)
+
+
 class GlobalPlugin(globalPluginHandler.GlobalPlugin):
     def __init__(self):
         super().__init__()
-        global _isPatched
-        if not _isPatched:
-            speechMod.getTextInfoSpeech = _patched_getTextInfoSpeech
-            speech.getTextInfoSpeech = _patched_getTextInfoSpeech
-            _isPatched = True
-            log.info("contentFirstBrowse: patched getTextInfoSpeech for browse mode caret")
+        self._settingsPanelRegistered = False
+        self._configHooksRegistered = False
+        if globalVars.appArgs.secure:
+            return
+        config.conf.spec[_CONFIG_SECTION] = _CONFIG_SPEC
+        if ContentFirstBrowseSettingsPanel not in gui.settingsDialogs.NVDASettingsDialog.categoryClasses:
+            gui.settingsDialogs.NVDASettingsDialog.categoryClasses.append(ContentFirstBrowseSettingsPanel)
+            self._settingsPanelRegistered = True
+        config.post_configProfileSwitch.register(self._applyConfiguredState)
+        config.post_configReset.register(self._applyConfiguredState)
+        self._configHooksRegistered = True
+        self._applyConfiguredState()
+
+    def _applyConfiguredState(self, **kwargs):
+        _setPatchEnabled(bool(config.conf[_CONFIG_SECTION]["enabled"]))
 
     def terminate(self):
-        global _isPatched
-        if _isPatched:
-            if speechMod.getTextInfoSpeech is _patched_getTextInfoSpeech:
-                speechMod.getTextInfoSpeech = _original_getTextInfoSpeech
-            if speech.getTextInfoSpeech is _patched_getTextInfoSpeech:
-                speech.getTextInfoSpeech = _original_getTextInfoSpeech
-            _isPatched = False
+        if self._configHooksRegistered:
+            config.post_configProfileSwitch.unregister(self._applyConfiguredState)
+            config.post_configReset.unregister(self._applyConfiguredState)
+        if (
+            self._settingsPanelRegistered
+            and ContentFirstBrowseSettingsPanel in gui.settingsDialogs.NVDASettingsDialog.categoryClasses
+        ):
+            gui.settingsDialogs.NVDASettingsDialog.categoryClasses.remove(ContentFirstBrowseSettingsPanel)
+        _setPatchEnabled(False)
+        super().terminate()

@@ -7,7 +7,8 @@ When moving the caret in browse mode, the plugin reads text content first, then 
 ## Features
 
 - Enables a "content first" speech order in browse mode.
-- Works automatically after installation with no extra configuration.
+- Enabled by default after installation.
+- Can be enabled or disabled from the "Browse mode content first" category in NVDA Settings.
 - Only affects qualified browse mode caret movement, without changing behavior in other scenarios.
 
 ## When It Applies
@@ -23,14 +24,16 @@ In all other cases, it falls back to NVDA's original speech logic.
 
 ## Compatibility
 
-- Plugin version: `1.0.5`
+- Plugin version: `1.1.0`
 - Minimum NVDA version: `2025.1`
 - Last tested NVDA version: `2026.1`
 
 ## Usage
 
-- This plugin has no shortcuts and no settings panel.
-- It works automatically after installation and restart.
+- Open the NVDA menu, then choose Preferences and Settings.
+- Select "Browse mode content first" from the category list.
+- Check or clear "Enable content-first speech in browse mode", then choose Apply or OK.
+- This plugin has no shortcuts.
 - In browse mode, move with arrow keys (or other reading commands) to hear content first.
 
 ## Known Limitations
