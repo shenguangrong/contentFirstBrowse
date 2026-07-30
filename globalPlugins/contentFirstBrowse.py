@@ -5,6 +5,7 @@ import builtins
 import itertools
 import globalPluginHandler
 import browseMode
+import scriptHandler
 import speech
 import speech.speech as speechMod
 from controlTypes import OutputReason
@@ -31,7 +32,9 @@ def _shouldApplyContentFirstForTextInfo(info):
         lastMoveWasFocus = getattr(doc, "_lastCaretMoveWasFocus", None)
         if lastMoveWasFocus is None:
             return False
-        return not lastMoveWasFocus
+        # NVDA speaks explicit caret movement before updating this flag, so it can
+        # still describe the preceding focus move while a navigation script runs.
+        return not lastMoveWasFocus or scriptHandler.getCurrentScript() is not None
     except Exception:
         return False
 
