@@ -113,7 +113,11 @@ def _patched_getTextInfoSpeech(
 	)
 	# For performance reasons, when navigating by paragraph or table cell, spelling errors will not be announced.
 	if unit in (textInfos.UNIT_PARAGRAPH, textInfos.UNIT_CELL) and reason == OutputReason.CARET:
-		formatConfig["reportSpellingErrors"] = False
+		# NVDA 2026.1 replaced the boolean setting with an integer bitmask.
+		if "reportSpellingErrors2" in formatConfig:
+			formatConfig["reportSpellingErrors2"] = 0
+		else:
+			formatConfig["reportSpellingErrors"] = False
 
 	# Fetch the last controlFieldStack, or make a blank one
 	controlFieldStackCache = speakTextInfoState.controlFieldStackCache if speakTextInfoState else []
