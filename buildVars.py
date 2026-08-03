@@ -22,12 +22,12 @@ addon_info = AddonInfo(
 	# Translators: Long description to be shown for this add-on on add-on information from add-on store
 	addon_description=_("In browse mode content is read before role and state information."),
 	# version
-	addon_version="1.1.0",
+	addon_version="1.1.1",
 	# Brief changelog for this version
 	# Translators: what's new content for the add-on version to be shown in the add-on store
 	addon_changelog=_(
-		"Improved initial browse mode caret navigation, added a setting to enable or disable "
-		"content-first speech, and added NVDA 2026.1 compatibility.",
+		"Fixed missing role and state announcements during character navigation and added "
+		"compatibility with NVDA 2026.1's spelling error reporting setting.",
 	),
 	# Author(s)
 	addon_author="沈广荣 <shenguangrong96@gmail.com>",

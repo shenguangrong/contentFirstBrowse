@@ -1,6 +1,6 @@
 msgid ""
 msgstr ""
-"Project-Id-Version: contentFirstBrowse 1.1.0\n"
+"Project-Id-Version: contentFirstBrowse 1.1.1\n"
 "Language: zh_CN\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -18,8 +18,8 @@ msgstr "在浏览模式下移动时，在角色和状态之前先朗读内容。
 
 #. Translators: Changes in this add-on release shown in the Add-on Store.
 #: buildVars.py
-msgid "Improved initial browse mode caret navigation, added a setting to enable or disable content-first speech, and added NVDA 2026.1 compatibility."
-msgstr "改进了首次浏览模式光标导航，新增了启用或停用内容优先朗读的设置，并增加了对 NVDA 2026.1 的兼容。"
+msgid "Fixed missing role and state announcements during character navigation and added compatibility with NVDA 2026.1's spelling error reporting setting."
+msgstr "修复了逐字符导航时角色和状态信息可能丢失的问题，并适配了 NVDA 2026.1 的拼写错误报告设置。"
 
 #. Translators: Checkbox that enables content-first speech in browse mode.
 #: addon/globalPlugins/contentFirstBrowse.py

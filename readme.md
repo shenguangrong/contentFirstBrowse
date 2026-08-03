@@ -24,7 +24,7 @@ In all other cases, it falls back to NVDA's original speech logic.
 
 ## Compatibility
 
-- Plugin version: `1.1.0`
+- Plugin version: `1.1.1`
 - Minimum NVDA version: `2025.1`
 - Last tested NVDA version: `2026.1`
 
